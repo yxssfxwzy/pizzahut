@@ -59,10 +59,10 @@ function getUserInfo($id) {
     $query;
 
     if($id == 0) {
-        $query = "SELECT * FROM users";
+        $query = "SELECT * FROM user";
     }
     else {
-        $query = "SELECT * FROM users WHERE ID='".$id."'";
+        $query = "SELECT * FROM user WHERE UID='".$id."'";
     }
 
 
@@ -74,23 +74,23 @@ function getUserInfo($id) {
 
     while($row = mysql_fetch_array($result)) {
 
-        $id = $row['id'];
-        $userName = $row['username'];
-        $empId = $row['uid'];
-        $firstName = $row['firstname'];
-        $lastName = $row['lastname'];
-        $sex = $row['sex'];
+        $uid = $row['uid'];
+        $name = $row['name'];
+        //$empId = $row['password'];
+        $tel = $row['tel'];
+        $address = $row['address'];
+        $coordinate = $row['coordinate'];
         $password = $row['password'];
         $isAdmin = $row['isadmin'];
 
         //Build the user object
         $user = new User();
-        $user->set_id($id);
-        $user->set_uid($empId);
-        $user->set_username($userName);
-        $user->set_firstname($firstName);
-        $user->set_lastname($lastName);
-        $user->set_sex($sex);
+        $user->set_uid($uid);
+        //$user->set_uid($empId);
+        $user->set_name($name);
+        $user->set_tel($tel);
+        $user->set_address($address);
+        $user->set_coordinate($coordinate);
         $user->set_password($password);
         $user->set_isadmin($isAdmin);
 
@@ -108,7 +108,7 @@ function editUser($user) {
     $query;
 
     if(isset($user)) {
-        $query = "update users set username='".$user->get_username()."',  firstname='".$user->get_firstname()."', lastname='".$user->get_lastname()."',sex='".$user->get_sex()."',uid=".$user->get_uid()." where id=".$user->get_id().";";
+        $query = "update user set username='".$user->get_username()."',  firstname='".$user->get_firstname()."', lastname='".$user->get_lastname()."',sex='".$user->get_sex()."',uid=".$user->get_uid()." where id=".$user->get_id().";";
     //echo $query;
     }
 
@@ -123,8 +123,8 @@ function login($user) {
     $query2;
 
     if(isset($user)) {
-        $query = "SELECT * FROM users where uid=".$user->get_uid()." and password='".sha1($user->get_password())."'";
-        $query2 = "SELECT count(*) as countNum FROM users where uid=".$user->get_uid()." and password='".sha1($user->get_password())."'";
+        $query = "SELECT * FROM user where uid=".$user->get_uid()." and password='".sha1($user->get_password())."'";
+        $query2 = "SELECT count(*) as countNum FROM user where uid=".$user->get_uid()." and password='".sha1($user->get_password())."'";
     }
     else {
         echo 'user is empty';
@@ -160,7 +160,7 @@ function changePassword($user,$newpassword,$confirmnewpassword) {
     $query;
 
     if(isset($user)) {
-        $query = "SELECT count(*) as countNum FROM users where id=".$user->get_id()." and password='".$user->get_password()."';";
+        $query = "SELECT count(*) as countNum FROM user where id=".$user->get_id()." and password='".$user->get_password()."';";
     }
 
     $result = mysql_query($query);
@@ -168,7 +168,7 @@ function changePassword($user,$newpassword,$confirmnewpassword) {
     $count = $countArr['countNum'];
 
     if (isset($count)&&$count==1) {
-        $query2 = "update users set password='".sha1($newpassword)."' where id=".$user->get_id().";";
+        $query2 = "update user set password='".sha1($newpassword)."' where id=".$user->get_id().";";
         $result2 = mysql_query($query2);
         if ($result2==true) {
             closeDB($connection);
@@ -197,7 +197,7 @@ function adminChangeUserPassword($user,$confirmnewpassword) {
     $query;
 
     if(isset($user)) {
-        $query = "SELECT count(*) as countNum FROM users where id=".$user->get_id().";";
+        $query = "SELECT count(*) as countNum FROM user where id=".$user->get_id().";";
     }
 
     $result = mysql_query($query);
@@ -205,7 +205,7 @@ function adminChangeUserPassword($user,$confirmnewpassword) {
     $count = $countArr['countNum'];
 
     if (isset($count)&&$count==1) {
-        $query2 = "update users set password='".sha1($user->get_password())."' where id=".$user->get_id().";";
+        $query2 = "update user set password='".sha1($user->get_password())."' where id=".$user->get_id().";";
         $result2 = mysql_query($query2);
         if ($result2==true) {
             closeDB($connection);
@@ -229,7 +229,7 @@ function toggleAdmin($user) {
     $query;
 
     if(isset($user)) {
-        $query = "SELECT id, isadmin from users where id=".$user->get_id().";";
+        $query = "SELECT id, isadmin from user where id=".$user->get_id().";";
     }
 
     $result = mysql_query($query);
@@ -248,7 +248,7 @@ function toggleAdmin($user) {
         }
 
     if (isset($isNewAdmin)) {
-        $query2 = "update users set isadmin='".$isNewAdmin."' where id=".$user->get_id().";";
+        $query2 = "update user set isadmin='".$isNewAdmin."' where id=".$user->get_id().";";
         $result2 = mysql_query($query2);
         if ($result2==true) {
             closeDB($connection);
@@ -279,7 +279,7 @@ function registerUser($user,$confirmpassword) {
     $query;
 
     if(isset($user)) {
-        $query = "SELECT count(*) as countNum FROM users where uid=".$user->get_uid().";";
+        $query = "SELECT count(*) as countNum FROM user where uid=".$user->get_uid().";";
     }
 
     $result = mysql_query($query);
@@ -292,11 +292,11 @@ function registerUser($user,$confirmpassword) {
         closeDB($connection);
         return false;
     }else {
-        $query2 = "insert into users (uid,name,tel,address,coordinate,password) values 
+        $query2 = "insert into user (uid,name,tel,address,coordinate,password) values 
         (".$user->get_uid().",'".$user->get_name()."','".$user->get_tel()."','".$user->get_address().
         "','".$user->get_coordinate()."','".sha1($user->get_password())."');";
-        echo $query2;
-        exit();
+       // echo $query2;
+        //exit();
         $result2 = mysql_query($query2);
         if ($result2== true) {
             closeDB($connection);
@@ -341,7 +341,7 @@ function getRestaurantInfo($id) {
 
         //Build the user object
         $restaurant = new Restaurant();
-        $restaurant->set_id($id);
+        $restaurant->set_uid($id);
         $restaurant->set_name($name);
         $restaurant->set_address($address);
         $restaurant->set_telephone($telephone);
@@ -379,7 +379,7 @@ function getUserRestaurantInfo() {
 
         //Build the user object
         $restaurant = new Restaurant();
-        $restaurant->set_id($id);
+        $restaurant->set_uid($id);
         $restaurant->set_name($name);
         $restaurant->set_address($address);
         $restaurant->set_telephone($telephone);
@@ -529,7 +529,7 @@ function getMenuItemInfo() {
 
         //Build the user object
         $restaurant = new Restaurant();
-        $restaurant->set_id($restaurant_id);
+        $restaurant->set_uid($restaurant_id);
         $restaurant->set_name($restaurant_name);
         $restaurant->set_address($restaurant_address);
         $restaurant->set_telephone($restaurant_telephone);
@@ -537,7 +537,7 @@ function getMenuItemInfo() {
         $restaurant->set_isactive($restaurant_isactive);
 
         $menuItem = new MenuItem();
-        $menuItem->set_id($id);
+        $menuItem->set_uid($id);
         $menuItem->set_restaurant_id($restaurant_id);
         $menuItem->set_restaurant($restaurant);
         $menuItem->set_menu_name($menu_name);
@@ -584,7 +584,7 @@ function getMenuItemInfoById($id) {
 
         //Build the user object
         $restaurant = new Restaurant();
-        $restaurant->set_id($restaurant_id);
+        $restaurant->set_uid($restaurant_id);
         $restaurant->set_name($restaurant_name);
         $restaurant->set_address($restaurant_address);
         $restaurant->set_telephone($restaurant_telephone);
@@ -592,7 +592,7 @@ function getMenuItemInfoById($id) {
         $restaurant->set_isactive($restaurant_isactive);
 
         $menuItem = new MenuItem();
-        $menuItem->set_id($id);
+        $menuItem->set_uid($id);
         $menuItem->set_restaurant_id($restaurant_id);
         $menuItem->set_restaurant($restaurant);
         $menuItem->set_menu_name($menu_name);
@@ -639,7 +639,7 @@ function getMenuItemInfoByRestaurantId($restaurant_id) {
 
         //Build the user object
         $restaurant = new Restaurant();
-        $restaurant->set_id($restaurant_id);
+        $restaurant->set_uid($restaurant_id);
         $restaurant->set_name($restaurant_name);
         $restaurant->set_address($restaurant_address);
         $restaurant->set_telephone($restaurant_telephone);
@@ -647,7 +647,7 @@ function getMenuItemInfoByRestaurantId($restaurant_id) {
         $restaurant->set_isactive($restaurant_isactive);
 
         $menuItem = new MenuItem();
-        $menuItem->set_id($id);
+        $menuItem->set_uid($id);
         $menuItem->set_restaurant_id($restaurant_id);
         $menuItem->set_restaurant($restaurant);
         $menuItem->set_menu_name($menu_name);
@@ -842,7 +842,7 @@ function getMealOrderInfoAll(){
         $starttime=date("Y-m-d");
         $endtime=date("Y-m-d",(time()+3600*24));
 
-        $query = "SELECT mealorders.id as mealorder_id, user_id, order_time,mealorders.description as mealorder_description,mealorders.promotion as mealorder_promotion,mealorders.isActive as mealorder_isActive,mealorderitems.id as mealorderitem_id,menuitem_id,mealorderitems.price as mealorderitem_price,amount,menu_name,name,users.id,username,uid FROM mealorders, mealorderitems,menuitems, restaurants,users where mealorderitems.mealorder_id=mealorders.id and mealorderitems.menuitem_id=menuitems.id and menuitems.restaurant_id=restaurants.id and user_id=users.id and order_time<'".$endtime."' and order_time>='".$starttime."' and mealorders.isActive='Y';";
+        $query = "SELECT mealorders.id as mealorder_id, user_id, order_time,mealorders.description as mealorder_description,mealorders.promotion as mealorder_promotion,mealorders.isActive as mealorder_isActive,mealorderitems.id as mealorderitem_id,menuitem_id,mealorderitems.price as mealorderitem_price,amount,menu_name,name,user.id,username,uid FROM mealorders, mealorderitems,menuitems, restaurants,user where mealorderitems.mealorder_id=mealorders.id and mealorderitems.menuitem_id=menuitems.id and menuitems.restaurant_id=restaurants.id and user_id=user.id and order_time<'".$endtime."' and order_time>='".$starttime."' and mealorders.isActive='Y';";
         //echo $query;
         $result = mysql_query($query);
     // or die ("Query Failed ".mysql_error());
@@ -863,7 +863,7 @@ function getMealOrderInfoHistory(){
         $starttime=date("Y-m-d");
         $endtime=date("Y-m-d",(time()+3600*24));
 
-        $query = "SELECT mealorders.id as mealorder_id, user_id, order_time,mealorders.description as mealorder_description,mealorders.promotion as mealorder_promotion,mealorders.isActive as mealorder_isActive,mealorderitems.id as mealorderitem_id,menuitem_id,mealorderitems.price as mealorderitem_price,amount,menu_name,name,users.id,username,uid FROM mealorders, mealorderitems,menuitems, restaurants,users where mealorderitems.mealorder_id=mealorders.id and mealorderitems.menuitem_id=menuitems.id and menuitems.restaurant_id=restaurants.id and user_id=users.id order by order_time desc;";
+        $query = "SELECT mealorders.id as mealorder_id, user_id, order_time,mealorders.description as mealorder_description,mealorders.promotion as mealorder_promotion,mealorders.isActive as mealorder_isActive,mealorderitems.id as mealorderitem_id,menuitem_id,mealorderitems.price as mealorderitem_price,amount,menu_name,name,user.id,username,uid FROM mealorders, mealorderitems,menuitems, restaurants,user where mealorderitems.mealorder_id=mealorders.id and mealorderitems.menuitem_id=menuitems.id and menuitems.restaurant_id=restaurants.id and user_id=user.id order by order_time desc;";
         //echo $query;
         $result = mysql_query($query);
     // or die ("Query Failed ".mysql_error());

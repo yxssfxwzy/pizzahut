@@ -6,7 +6,7 @@
 include "foodmanager.php";
 
 $user = new User();
-$user->set_empid($_POST['empid']);
+$user->set_uid($_POST['uid']);
 $user->set_password($_POST['password']);
 
 if (login($user)) {
