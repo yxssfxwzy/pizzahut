@@ -29,10 +29,9 @@ session_start();
                                 <tr><td>电话:</td><td><input type='text' name='tel' value=''/></td></tr>
                                 <tr><td>地址:</td><td><input type='text' name='address' value=''/></td></tr>
                                 <tr><td>经纬度:</td><td><input type='text' name='coordinate' value=''/></td></tr>
-                                <tr><td>性别:</td><td><input type='text' name='sex' value=''/></td></tr>
                                 <tr><td>输入密码</td><td><input type='password' name='password' value=''/></td></tr>
                                 <tr><td>确认密码</td><td><input type='password' name='confirmpassword' value=''/></td></tr>
-                                <tr><td colspan='2'><input type='submit' value='注册'/>&nbsp;<input type='button' value='放弃' /></td></tr>
+                                <tr><td colspan='2'><input type='submit' value='注册'/>&nbsp;<input type='button' value='放弃'  onclick='javaScript:window.location.href="index.php";'/></td></tr>
                         </table>
                         </form>
                     </div>

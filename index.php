@@ -19,12 +19,15 @@ session_start();
                     <h1>登陆</h1>
                 <form action="login.php" method="post">
                 <table>
+                <h2><?php
+                    	echo $_SESSION['errorMessage'];
+                        unset($_SESSION['errorMessage']);
+                    ?></h2>
                 <tr><td  class="login">用户ID:</td><td><input type="text" name="uid" value="" /></td></tr>
                 <tr><td  class="login">密码:</td><td><input type="password" name="password" value="" /></td></tr>
-                <tr><td colspan="2"><input type="submit" value="登陆"/></td></tr>
+                <tr><td colspan="2"><input type="submit" value="登陆"/>&nbsp;<input type='button' value='注册'  onclick='javaScript:window.location.href="register.php";'/></td></tr>
                 </table>
             </form>
-                <a href="register.php">注册</a>                
                 </div>
                 <!-- end div#content -->
                 <div id="sidebar">

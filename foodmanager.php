@@ -29,10 +29,8 @@ function initDB() {
 
 
 
-        $connection = mysql_connect($databaseURL,$databaseUName,$databasePWord);
-        // or die ("Error while connecting to localhost");
-        $db = mysql_select_db($databaseName,$connection);
-        //or die ("Error while connecting to database");
+        $connection = mysql_connect($databaseURL,$databaseUName,$databasePWord) or die ("Error while connecting to localhost".mysql_error());
+        $db = mysql_select_db($databaseName,$connection) or die ("Error while connecting to database".mysql_error());
 
         mysql_close($connection);
     }
@@ -41,10 +39,8 @@ function initDB() {
     $databasePWord = $_SESSION['databasePWord'];
     $databaseName = $_SESSION['databaseName'];
 
-    $connection = mysql_connect($databaseURL,$databaseUName,$databasePWord);
-    //or die ("Error while connecting to host");
-    $db = mysql_select_db($databaseName,$connection);
-    //or die ("Error while connecting to database");
+    $connection = mysql_connect($databaseURL,$databaseUName,$databasePWord) or die ("Error while connecting to host".mysql_error());
+    $db = mysql_select_db($databaseName,$connection) or die ("Error while connecting to database".mysql_error());
     return $connection;
 }
 
@@ -53,18 +49,16 @@ function closeDB($connection) {
     mysql_close($connection);
 }
 
-
-function getUserInfo($id) {
+function getUserInfo($uid) {
     $connection = initDB();
     $query;
 
-    if($id == 0) {
+    if($uid == 0) {
         $query = "SELECT * FROM user";
     }
     else {
-        $query = "SELECT * FROM user WHERE UID='".$id."'";
+        $query = "SELECT * FROM user WHERE UID='".$uid."'";
     }
-
 
     $result = mysql_query($query);
     // or die ("Query Failed ".mysql_error());
@@ -76,7 +70,6 @@ function getUserInfo($id) {
 
         $uid = $row['uid'];
         $name = $row['name'];
-        //$empId = $row['password'];
         $tel = $row['tel'];
         $address = $row['address'];
         $coordinate = $row['coordinate'];
@@ -86,7 +79,6 @@ function getUserInfo($id) {
         //Build the user object
         $user = new User();
         $user->set_uid($uid);
-        //$user->set_uid($empId);
         $user->set_name($name);
         $user->set_tel($tel);
         $user->set_address($address);
@@ -102,13 +94,12 @@ function getUserInfo($id) {
     return $userData;
 }
 
-
 function editUser($user) {
     $connection = initDB();
     $query;
 
     if(isset($user)) {
-        $query = "update user set username='".$user->get_username()."',  firstname='".$user->get_firstname()."', lastname='".$user->get_lastname()."',sex='".$user->get_sex()."',uid=".$user->get_uid()." where id=".$user->get_id().";";
+        $query = "update user set name='".$user->get_name()."', address='".$user->get_address()."',tel=".$user->get_tel()."',coordinate=".$user->get_coordinate()." where uid='".$user->get_uid()."';";
     //echo $query;
     }
 
@@ -120,33 +111,29 @@ function editUser($user) {
 function login($user) {
     $connection = initDB();
     $query;
-    $query2;
-
+    
     if(isset($user)) {
-        $query = "SELECT * FROM user where uid=".$user->get_uid()." and password='".sha1($user->get_password())."'";
-        $query2 = "SELECT count(*) as countNum FROM user where uid=".$user->get_uid()." and password='".sha1($user->get_password())."'";
+        $query = "SELECT * FROM user where uid='".$user->get_uid()."' ;";
     }
     else {
         echo 'user is empty';
     }
 
-
-    $result = mysql_query($query);
-    // or die ("Query Failed ".mysql_error());
-    $result2 = mysql_query($query2);
-    $countArr =  mysql_fetch_assoc($result2);
-    $count = $countArr['countNum'];
-    $arr = mysql_fetch_assoc($result);
-
+    $result = mysql_query($query) or die ( Header("Location:index.php")+$_SESSION['errorMessage']="用户ID不存在");
+    $Arr =  mysql_fetch_assoc($result);
     closeDB($connection);
-    if (isset($arr)&&$count==1) {
-        session_start();
+    if(sha1($user->get_password()) != $Arr['password']){
+		session_start();
+		$_SESSION['errorMessage']="密码错误";
+		return false;
+	}
+	else{
+	    session_start();
         $_SESSION['login']=true;
-        $_SESSION['userData']=json_encode($arr);
-        $_SESSION['isAdmin']=$arr['isadmin']=='Y';
+		$_SESSION['uid']=$user->get_uid();
+        $_SESSION['userData']=json_encode($Arr);
+        $_SESSION['isAdmin']=$Arr['isadmin']=='Y';
         return true;
-    }else {
-        return false;
     }
 }
 
@@ -187,7 +174,8 @@ function changePassword($user,$newpassword,$confirmnewpassword) {
     }
 }
 
-function adminChangeUserPassword($user,$confirmnewpassword) {
+function adminChangeUserPassword($user,$confirmnewpassword) //这功能看起来不科学- -
+{
     if ($user->get_password()!=$confirmnewpassword) {
         session_start();
         $_SESSION['errorMessage']="New password not match.";
@@ -224,12 +212,13 @@ function adminChangeUserPassword($user,$confirmnewpassword) {
     }
 }
 
-function toggleAdmin($user) {
+function toggleAdmin($user) //管理员应该不能修改才对吧
+{
     $connection = initDB();
     $query;
 
     if(isset($user)) {
-        $query = "SELECT id, isadmin from user where id=".$user->get_id().";";
+        $query = "SELECT uid, isadmin from user where uid='".$user->get_uid()."';";
     }
 
     $result = mysql_query($query);
@@ -239,7 +228,7 @@ function toggleAdmin($user) {
     session_start();
     $userData = json_decode($_SESSION['userData'],true);
 
-    if ($isAdmin=='N' || $userData['id']==$user->get_id()) {
+    if ($isAdmin=='N' || $userData['uid']==$user->get_uid()) {
         $isNewAdmin='Y';
     }else if($isAdmin=='Y') {
             $isNewAdmin= 'N';
@@ -248,7 +237,7 @@ function toggleAdmin($user) {
         }
 
     if (isset($isNewAdmin)) {
-        $query2 = "update user set isadmin='".$isNewAdmin."' where id=".$user->get_id().";";
+        $query2 = "update user set isadmin='".$isNewAdmin."' where uid='".$user->get_uid()."';";
         $result2 = mysql_query($query2);
         if ($result2==true) {
             closeDB($connection);
@@ -268,7 +257,6 @@ function toggleAdmin($user) {
     }
 }
 
-
 function registerUser($user,$confirmpassword) {
     if ($user->get_password()!=$confirmpassword) {
         session_start();
@@ -279,24 +267,21 @@ function registerUser($user,$confirmpassword) {
     $query;
 
     if(isset($user)) {
-        $query = "SELECT count(*) as countNum FROM user where uid=".$user->get_uid().";";
+        $query = "SELECT uid FROM user where uid='".$user->get_uid()."';";
     }
 
     $result = mysql_query($query);
-    $countArr =  mysql_fetch_assoc($result);
-    $count = $countArr['countNum'];
+    $Arr =  mysql_fetch_assoc($result);
 
-    if (isset($count)&&$count==1) {
+    if ($Arr['uid']) {
         session_start();
         $_SESSION['errorMessage']="用户id已存在";
         closeDB($connection);
         return false;
     }else {
         $query2 = "insert into user (uid,name,tel,address,coordinate,password) values 
-        (".$user->get_uid().",'".$user->get_name()."','".$user->get_tel()."','".$user->get_address().
+        ('".$user->get_uid()."','".$user->get_name()."','".$user->get_tel()."','".$user->get_address().
         "','".$user->get_coordinate()."','".sha1($user->get_password())."');";
-       // echo $query2;
-        //exit();
         $result2 = mysql_query($query2);
         if ($result2== true) {
             closeDB($connection);
@@ -309,8 +294,6 @@ function registerUser($user,$confirmpassword) {
         }
     }
 }
-
-
 
 function getRestaurantInfo($id) {
     $connection = initDB();

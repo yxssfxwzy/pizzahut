@@ -17,6 +17,7 @@ if (login($user)) {
         Header("Location:userhomepage.php");
     }
 }else {
-   Header("Location:index.php");
+	session_start();    
+    Header("Location:index.php");
 }
 ?>
