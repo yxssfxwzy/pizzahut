@@ -13,7 +13,6 @@ $databaseName;
 
 
 function initDB() {
-
     if(! isset($_SESSION['databaseURL'])) {
         include("conf/conf.php");
         $dbConf = new FoodConf();
@@ -44,7 +43,6 @@ function initDB() {
     return $connection;
 }
 
-
 function closeDB($connection) {
     mysql_close($connection);
 }
@@ -60,8 +58,7 @@ function getUserInfo($uid) {
         $query = "SELECT * FROM user WHERE UID='".$uid."'";
     }
 
-    $result = mysql_query($query);
-    // or die ("Query Failed ".mysql_error());
+    $result = mysql_query($query) or die ("Query Failed ".mysql_error());
 
     $userData;
     $lineId = 0;
@@ -99,12 +96,11 @@ function editUser($user) {
     $query;
 
     if(isset($user)) {
-        $query = "update user set name='".$user->get_name()."', address='".$user->get_address()."',tel=".$user->get_tel()."',coordinate=".$user->get_coordinate()." where uid='".$user->get_uid()."';";
+        $query = "update user set name='".$user->get_name()."', address='".$user->get_address()."',tel='".$user->get_tel()."',coordinate='".$user->get_coordinate()."' where uid='".$user->get_uid()."';";
     //echo $query;
     }
 
-    $result = mysql_query($query);
-    // or die ("Query Failed ".mysql_error());
+    $result = mysql_query($query) or die ("Query Failed ".mysql_error());
     closeDB($connection);
 }
 
@@ -113,16 +109,22 @@ function login($user) {
     $query;
     
     if(isset($user)) {
-        $query = "SELECT * FROM user where uid='".$user->get_uid()."' ;";
+        $query = "SELECT password FROM user where uid='".$user->get_uid()."' ;";
     }
     else {
         echo 'user is empty';
     }
 
-    $result = mysql_query($query) or die ( Header("Location:index.php")+$_SESSION['errorMessage']="用户ID不存在");
+    $result = mysql_query($query);
     $Arr =  mysql_fetch_assoc($result);
     closeDB($connection);
-    if(sha1($user->get_password()) != $Arr['password']){
+	if ($Arr == null)
+	{
+		session_start();
+		$_SESSION['errorMessage']="用户ID不存在";
+		return false;
+	}
+    else if(sha1($user->get_password()) != $Arr['password']){
 		session_start();
 		$_SESSION['errorMessage']="密码错误";
 		return false;
@@ -147,23 +149,23 @@ function changePassword($user,$newpassword,$confirmnewpassword) {
     $query;
 
     if(isset($user)) {
-        $query = "SELECT count(*) as countNum FROM user where id=".$user->get_id()." and password='".$user->get_password()."';";
+        $query = "SELECT password FROM user where uid='".$user->get_uid()."';";
     }
 
     $result = mysql_query($query);
-    $countArr =  mysql_fetch_assoc($result);
-    $count = $countArr['countNum'];
+    $Arr =  mysql_fetch_assoc($result);
 
-    if (isset($count)&&$count==1) {
-        $query2 = "update user set password='".sha1($newpassword)."' where id=".$user->get_id().";";
+    if ($Arr['password'] == sha1($user->get_password())) {
+        $query2 = "update user set password='".sha1($newpassword)."' where uid=".$user->get_uid().";";
         $result2 = mysql_query($query2);
         if ($result2==true) {
-            closeDB($connection);
-            return true;
+			closeDB($connection);
+			return true;
         }else {
             session_start();
             $_SESSION['errorMessage']="Update password error.";
             closeDB($connection);
+			return false;
         }
 
     }else {
@@ -174,7 +176,7 @@ function changePassword($user,$newpassword,$confirmnewpassword) {
     }
 }
 
-function adminChangeUserPassword($user,$confirmnewpassword) //这功能看起来不科学- -
+function adminChangeUserPassword($user,$confirmnewpassword) 
 {
     if ($user->get_password()!=$confirmnewpassword) {
         session_start();
@@ -212,7 +214,7 @@ function adminChangeUserPassword($user,$confirmnewpassword) //这功能看起来
     }
 }
 
-function toggleAdmin($user) //管理员应该不能修改才对吧
+function toggleAdmin($user) 
 {
     $connection = initDB();
     $query;

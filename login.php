@@ -14,7 +14,7 @@ if (login($user)) {
     if ($_SESSION['isAdmin']==true){
         Header("Location:adminhomepage.php");
     }else {
-        Header("Location:userhomepage.php");
+        Header("Location:user/userhomepage.php");
     }
 }else {
 	session_start();    
