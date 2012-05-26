@@ -1,7 +1,6 @@
 <?php
 class User {
   private $uid;
-
   private $name;
   private $tel;
   private $address;

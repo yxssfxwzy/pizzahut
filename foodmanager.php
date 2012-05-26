@@ -1,11 +1,11 @@
 ﻿<?php
 include("domain/user.php");
-include("domain/restaurant.php");
-include("domain/menuitem.php");
-include("domain/mealorder.php");
+include("domain/branch.php");
+include("domain/product.php");
+include("domain/order.php");
 include("domain/mealorderitem.php");
 
-
+	
 $databaseURL;
 $databaseUName;
 $databasePWord;
@@ -297,88 +297,40 @@ function registerUser($user,$confirmpassword) {
     }
 }
 
-function getRestaurantInfo($id) {
+function getBranchInfo() {
     $connection = initDB();
     $query;
 
-    if($id == 0) {
-        $query = "SELECT * FROM restaurants";
-    }
-    else {
-        $query = "SELECT * FROM restaurants WHERE ID='".$id."'";
-    }
+    $query = "SELECT * FROM branch";
 
+    $result = mysql_query($query) or die ("Query Failed ".mysql_error());
 
-    $result = mysql_query($query);
-    // or die ("Query Failed ".mysql_error());
-
-    $restaurantData;
+    $branchData;
     $lineId = 0;
 
     while($row = mysql_fetch_array($result)) {
 
-        $id = $row['id'];
+        $bid = $row['bid'];
         $name = $row['name'];
         $address = $row['address'];
-        $telephone = $row['telephone'];
-        $description = $row['description'];
-        $isActive = $row['isActive'];
+        $tel = $row['tel'];
+        $coordinate = $row['coordinate'];
 
         //Build the user object
-        $restaurant = new Restaurant();
-        $restaurant->set_uid($id);
-        $restaurant->set_name($name);
-        $restaurant->set_address($address);
-        $restaurant->set_telephone($telephone);
-        $restaurant->set_description($description);
-        $restaurant->set_isactive($isActive);
+        $branch = new Branch();
+        $branch->set_uid($bid);
+        $branch->set_name($name);
+        $branch->set_address($address);
+        $branch->set_telephone($tel);
+        $branch->set_description($coordinate);
 
         //Build the Flight object array
-        $restaurantData[$lineId] = $restaurant;
+        $branchData[$lineId] = $branch;
         $lineId = $lineId + 1;
     }
     closeDB($connection);
-    return $restaurantData;
+    return $branchData;
 }
-
-function getUserRestaurantInfo() {
-    $connection = initDB();
-    $query;
-
-    $query = "SELECT * FROM restaurants where isActive='Y'";
-
-    $result = mysql_query($query);
-    // or die ("Query Failed ".mysql_error());
-
-    $restaurantData;
-    $lineId = 0;
-
-    while($row = mysql_fetch_array($result)) {
-
-        $id = $row['id'];
-        $name = $row['name'];
-        $address = $row['address'];
-        $telephone = $row['telephone'];
-        $description = $row['description'];
-        $isActive = $row['isActive'];
-
-        //Build the user object
-        $restaurant = new Restaurant();
-        $restaurant->set_uid($id);
-        $restaurant->set_name($name);
-        $restaurant->set_address($address);
-        $restaurant->set_telephone($telephone);
-        $restaurant->set_description($description);
-        $restaurant->set_isactive($isActive);
-
-        //Build the Flight object array
-        $restaurantData[$lineId] = $restaurant;
-        $lineId = $lineId + 1;
-    }
-    closeDB($connection);
-    return $restaurantData;
-}
-
 
 function addRestaurant($restaurant) {
     $connection = initDB();
@@ -484,169 +436,75 @@ function toggleRestaurant($restaurant) {
     }
 }
 
-function getMenuItemInfo() {
+function getProducts($name) {
     $connection = initDB();
     $query;
+	if (!$name)
+    {$query = "SELECT * FROM product";}
+	else
+	{$query = "SELECT * FROM product WHERE name LIKE'%".$name."%';";}
 
-    $query = "SELECT  menuitems.id as id,restaurant_id,menu_name,menu_description,menuitems.isActive,price,menuitems.promotion,restaurants.id as rest_id,restaurants.name,restaurants.description,address,telephone,restaurants.isactive FROM menuitems, restaurants where menuitems.restaurant_id=restaurants.id";
+    $result = mysql_query($query) or die ("Query Failed ".mysql_error());
 
-    $result = mysql_query($query);
-    // or die ("Query Failed ".mysql_error());
-
-    $menuItemData;
+    $productData;
     $lineId = 0;
 
     while($row = mysql_fetch_array($result)) {
 
-        $id = $row['id'];
-        $restaurant_id = $row['restaurant_id'];
-        $menu_name = $row['menu_name'];
-        $menu_description = $row['menu_description'];
-        $isActive = $row['isActive'];
+        $pid = $row['pid'];
+        $sort = $row['sort'];
+        $name = $row['name'];
         $price = $row['price'];
-        $promotion= $row['promotion'];
-
-        $restaurant_name=$row['name'];
-        $restaurant_description=$row['description'];
-        $restaurant_address=$row['address'];
-        $restaurant_telephone=$row['telephone'];
-        $restaurant_isactive=$row['isactive'];
+        $description= $row['description'];
 
         //Build the user object
-        $restaurant = new Restaurant();
-        $restaurant->set_uid($restaurant_id);
-        $restaurant->set_name($restaurant_name);
-        $restaurant->set_address($restaurant_address);
-        $restaurant->set_telephone($restaurant_telephone);
-        $restaurant->set_description($restaurant_description);
-        $restaurant->set_isactive($restaurant_isactive);
-
-        $menuItem = new MenuItem();
-        $menuItem->set_uid($id);
-        $menuItem->set_restaurant_id($restaurant_id);
-        $menuItem->set_restaurant($restaurant);
-        $menuItem->set_menu_name($menu_name);
-        $menuItem->set_menu_description($menu_description);
-        $menuItem->set_isActive($isActive);
-        $menuItem->set_price($price);
-        $menuItem->set_promotion($promotion);
+        $product = new Product();
+        $product->set_pid($pid);
+        $product->set_sort($sort);
+        $product->set_name($name);
+        $product->set_price($price);
+        $product->set_description($description);
 
         //Build the Flight object array
-        $menuItemData[$lineId] = $menuItem;
+        $productData[$lineId] = $product;
         $lineId = $lineId + 1;
     }
     closeDB($connection);
-    return $menuItemData;
+    return $productData;
 }
 
-function getMenuItemInfoById($id) {
+function getProductInfo($pid) {
     $connection = initDB();
     $query;
 
-    $query = "SELECT  menuitems.id as id,restaurant_id,menu_name,menu_description,menuitems.isActive,price,menuitems.promotion,restaurants.id as rest_id,restaurants.name,restaurants.description,address,telephone,restaurants.isactive FROM menuitems, restaurants where menuitems.restaurant_id=restaurants.id and menuitems.id=".$id.";";
+    $query = "SELECT * FROM product WHERE pid=".$pid.";";
+	
+    $result = mysql_query($query) or die ("Query Failed ".mysql_error());
 
-    $result = mysql_query($query);
-    // or die ("Query Failed ".mysql_error());
-
-    $menuItemData;
+    $productData;
     $lineId = 0;
 
     while($row = mysql_fetch_array($result)) {
-
-        $id = $row['id'];
-        $restaurant_id = $row['restaurant_id'];
-        $menu_name = $row['menu_name'];
-        $menu_description = $row['menu_description'];
-        $isActive = $row['isActive'];
+        $pid = $row['pid'];
+        $sort = $row['sort'];
+        $name = $row['name'];
         $price = $row['price'];
-        $promotion= $row['promotion'];
-
-        $restaurant_name=$row['name'];
-        $restaurant_description=$row['description'];
-        $restaurant_address=$row['address'];
-        $restaurant_telephone=$row['telephone'];
-        $restaurant_isactive=$row['isactive'];
+        $description= $row['description'];
 
         //Build the user object
-        $restaurant = new Restaurant();
-        $restaurant->set_uid($restaurant_id);
-        $restaurant->set_name($restaurant_name);
-        $restaurant->set_address($restaurant_address);
-        $restaurant->set_telephone($restaurant_telephone);
-        $restaurant->set_description($restaurant_description);
-        $restaurant->set_isactive($restaurant_isactive);
-
-        $menuItem = new MenuItem();
-        $menuItem->set_uid($id);
-        $menuItem->set_restaurant_id($restaurant_id);
-        $menuItem->set_restaurant($restaurant);
-        $menuItem->set_menu_name($menu_name);
-        $menuItem->set_menu_description($menu_description);
-        $menuItem->set_isActive($isActive);
-        $menuItem->set_price($price);
-        $menuItem->set_promotion($promotion);
+        $product = new Product();
+        $product->set_pid($pid);
+        $product->set_sort($sort);
+        $product->set_name($name);
+        $product->set_price($price);
+        $product->set_description($description);
 
         //Build the Flight object array
-        $menuItemData[$lineId] = $menuItem;
+        $productData[$lineId] = $product;
         $lineId = $lineId + 1;
     }
     closeDB($connection);
-    return $menuItemData;
-}
-
-function getMenuItemInfoByRestaurantId($restaurant_id) {
-    $connection = initDB();
-    $query;
-
-    $query = "SELECT  menuitems.id as id,restaurant_id,menu_name,menu_description,menuitems.isActive,price,menuitems.promotion,restaurants.id as rest_id,restaurants.name,restaurants.description,address,telephone,restaurants.isactive FROM menuitems, restaurants where menuitems.restaurant_id=restaurants.id and menuitems.restaurant_id=".$restaurant_id;
-
-    $result = mysql_query($query);
-    // or die ("Query Failed ".mysql_error());
-
-    $menuItemData;
-    $lineId = 0;
-
-    while($row = mysql_fetch_array($result)) {
-
-        $id = $row['id'];
-        $restaurant_id = $row['restaurant_id'];
-        $menu_name = $row['menu_name'];
-        $menu_description = $row['menu_description'];
-        $isActive = $row['isActive'];
-        $price = $row['price'];
-        $promotion= $row['promotion'];
-
-        $restaurant_name=$row['name'];
-        $restaurant_description=$row['description'];
-        $restaurant_address=$row['address'];
-        $restaurant_telephone=$row['telephone'];
-        $restaurant_isactive=$row['isactive'];
-
-        //Build the user object
-        $restaurant = new Restaurant();
-        $restaurant->set_uid($restaurant_id);
-        $restaurant->set_name($restaurant_name);
-        $restaurant->set_address($restaurant_address);
-        $restaurant->set_telephone($restaurant_telephone);
-        $restaurant->set_description($restaurant_description);
-        $restaurant->set_isactive($restaurant_isactive);
-
-        $menuItem = new MenuItem();
-        $menuItem->set_uid($id);
-        $menuItem->set_restaurant_id($restaurant_id);
-        $menuItem->set_restaurant($restaurant);
-        $menuItem->set_menu_name($menu_name);
-        $menuItem->set_menu_description($menu_description);
-        $menuItem->set_isActive($isActive);
-        $menuItem->set_price($price);
-        $menuItem->set_promotion($promotion);
-
-        //Build the Flight object array
-        $menuItemData[$lineId] = $menuItem;
-        $lineId = $lineId + 1;
-    }
-    closeDB($connection);
-    return $menuItemData;
+    return $productData;
 }
 
 function addMenuItem($menuItem) {
@@ -753,21 +611,21 @@ function editMenuItem($menuItem) {
     closeDB($connection);
 }
 
-function addMealOrder($mealorder, $mealorderitem){
+function addOrder($order){
  $connection = initDB();
     $query;
 
-    if(isset($mealorder)) {
-        $query = "insert into mealorders (user_id, order_time, description, promotion) values (".$mealorder->get_user_id().",'".$mealorder->get_order_time()."','".$mealorder->get_description()."','".$mealorder->get_promotion()."');";
+    if(isset($order)) {
+        $query = "insert into `order` (uid, bid, pid, quantity, price, time,status) values ('".$order->get_uid()."',0,".$order->get_pid().",".$order->get_quantity().",".$order->get_price().",'".$order->get_time()."','".$order->get_status()."');";
     }
     else {
-        echo "The meal order is empty!";
+        echo "The order is empty!";
         return false;
     }
 
-    //echo $query;
-    $result = mysql_query($query);
-    $mealorder_id = mysql_insert_id();
+    $result = mysql_query($query) or die ("Query Failed ".mysql_error());;
+	if (!$result){
+    /*$mealorder_id = mysql_insert_id();
 
     if(isset($mealorder)) {
     $mealorderitem->set_mealorder_id($mealorder_id);
@@ -784,7 +642,7 @@ function addMealOrder($mealorder, $mealorderitem){
         echo "insert meal order wrong!";
         return false;
     }else if ($result1==false){
-        echo "insert meal order item wrong!";
+        echo "insert meal order item wrong!";*/
         return false;
     }else{
         return true;
