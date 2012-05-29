@@ -2,15 +2,22 @@
 include "../foodmanager.php";
 
 $name = $_POST['name'];
-$productData = getProducts($name);
+$sort = $_POST['sort'];
+if ($sort == 'all')
+{
+	$sort = '';
+}
+
+$productData = getProducts($name,$sort);
 
 if (count($productData) == 0)
 {
-	Header("Location:noResult.php");
+	$name = 'null';
 }
-else {
+
 	session_start();
 	$_SESSION['productName'] = $name;
+	$_SESSION['sort'] = $sort;
 	Header("Location:viewproducts.php");
-}
+
 ?>

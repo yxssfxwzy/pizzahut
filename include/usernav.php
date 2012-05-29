@@ -8,7 +8,7 @@
         <li><a href="../logout.php">Logout</a></li>
         <li><a href="../product/viewproducts.php">products</a></li>
         <li><a href="../order/order.php">Order</a></li>
-        <li><a href="viewMealOrder.php">View Order</a></li>
+        <li><a href="../order/viewOrder.php">View Order</a></li>
         <li><a href="../branch/viewbranch.php">branchs</a></li>
         
     </ul>

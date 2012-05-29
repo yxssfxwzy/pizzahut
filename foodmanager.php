@@ -109,7 +109,7 @@ function login($user) {
     $query;
     
     if(isset($user)) {
-        $query = "SELECT password FROM user where uid='".$user->get_uid()."' ;";
+        $query = "SELECT password,isadmin FROM user where uid='".$user->get_uid()."' ;";
     }
     else {
         echo 'user is empty';
@@ -133,8 +133,8 @@ function login($user) {
 	    session_start();
         $_SESSION['login']=true;
 		$_SESSION['uid']=$user->get_uid();
-        $_SESSION['userData']=json_encode($Arr);
         $_SESSION['isAdmin']=$Arr['isadmin']=='Y';
+        $_SESSION['userData']=json_encode($Arr);
         return true;
     }
 }
@@ -318,11 +318,11 @@ function getBranchInfo() {
 
         //Build the user object
         $branch = new Branch();
-        $branch->set_uid($bid);
+        $branch->set_bid($bid);
         $branch->set_name($name);
         $branch->set_address($address);
-        $branch->set_telephone($tel);
-        $branch->set_description($coordinate);
+        $branch->set_tel($tel);
+        $branch->set_coordinate($coordinate);
 
         //Build the Flight object array
         $branchData[$lineId] = $branch;
@@ -436,14 +436,16 @@ function toggleRestaurant($restaurant) {
     }
 }
 
-function getProducts($name) {
+function getProducts($name,$sort) {
     $connection = initDB();
     $query;
-	if (!$name)
-    {$query = "SELECT * FROM product";}
-	else
-	{$query = "SELECT * FROM product WHERE name LIKE'%".$name."%';";}
-
+	if (!$sort){
+		$query = "SELECT * FROM product WHERE name LIKE'%".$name."%';";
+	}
+	else {
+		$query = "SELECT * FROM product WHERE name LIKE'%".$name."%' and sort = '".$sort."';";
+	}
+	
     $result = mysql_query($query) or die ("Query Failed ".mysql_error());
 
     $productData;
@@ -612,7 +614,7 @@ function editMenuItem($menuItem) {
 }
 
 function addOrder($order){
- $connection = initDB();
+ 	$connection = initDB();
     $query;
 
     if(isset($order)) {
@@ -625,62 +627,50 @@ function addOrder($order){
 
     $result = mysql_query($query) or die ("Query Failed ".mysql_error());;
 	if (!$result){
-    /*$mealorder_id = mysql_insert_id();
-
-    if(isset($mealorder)) {
-    $mealorderitem->set_mealorder_id($mealorder_id);
-
-    $query1 = "insert into mealorderitems (mealorder_id, menuitem_id,price, amount) values (".$mealorderitem->get_mealorder_id().",".$mealorderitem->get_menuitem_id().",".$mealorderitem->get_price().",".$mealorderitem->get_amount().");";
-    //echo $query1;
-    $result1 = mysql_query($query1);
-    }
-    else {
-        echo "The meal order item is empty!";
-        return false;
-    }
-    if ($result==false) {
-        echo "insert meal order wrong!";
-        return false;
-    }else if ($result1==false){
-        echo "insert meal order item wrong!";*/
         return false;
     }else{
         return true;
     }
 }
 
-function getMealOrderInfo($user_id){
-  $connection = initDB();
+function getOrderInfo($uid,$status){
+  	$connection = initDB();
     $query;
 
-    if(isset($user_id)) {
-        date_default_timezone_set("PRC");
-        $starttime=date("Y-m-d");
-        $endtime=date("Y-m-d",(time()+3600*24));
-
-        $query = "SELECT mealorders.id as mealorder_id, user_id, order_time,mealorders.description as mealorder_description,mealorders.promotion as mealorder_promotion,mealorders.isActive as mealorder_isActive,mealorderitems.id as mealorderitem_id,menuitem_id,mealorderitems.price as mealorderitem_price,amount,menu_name,name FROM mealorders, mealorderitems,menuitems, restaurants where mealorderitems.mealorder_id=mealorders.id and mealorderitems.menuitem_id=menuitems.id and menuitems.restaurant_id=restaurants.id and user_id=".$user_id." and order_time<'".$endtime."' and order_time>='".$starttime."' and mealorders.isActive='Y';";
+    $query = "SELECT * FROM `order` WHERE uid = '".$uid."' and status LIKE '".$status."';";
         //echo $query;
-        $result = mysql_query($query);
-    // or die ("Query Failed ".mysql_error());
-    $res_array;
-    for ($count=0; $row = mysql_fetch_assoc($result); $count++) {
-     $res_array[$count] = $row;
+    $result = mysql_query($query) or die ("Query Failed ".mysql_error());
+   	$orderData;
+	$lineId = 0;
+
+    while($row = mysql_fetch_array($result)) {
+		$oid = $row['oid'];
+        $pid = $row['pid'];
+        $quantity = $row['quantity'];
+        $price = $row['price'];
+        $time = $row['time'];
+        $status= $row['status'];
+
+        //Build the user object
+        $order = new Order();
+		$order->set_oid($oid);
+        $order->set_pid($pid);
+        $order->set_quantity($quantity);
+        $order->set_price($price);
+        $order->set_time($time);
+        $order->set_status($status);
+
+        //Build the Flight object array
+        $orderData[$lineId] = $order;
+        $lineId = $lineId + 1;
     }
     closeDB($connection);
-    return $res_array;
-    }
-    else {
-        closeDB($connection);
-        echo "Get Meal Order Info fail, the user id is not set.";
-        return null;
-    }
+    return $orderData;
 }
 
 function getMealOrderInfoAll(){
   $connection = initDB();
     $query;
-
-
         date_default_timezone_set("PRC");
         $starttime=date("Y-m-d");
         $endtime=date("Y-m-d",(time()+3600*24));
@@ -697,96 +687,76 @@ function getMealOrderInfoAll(){
     return $res_array;
 }
 
-function getMealOrderInfoHistory(){
-  $connection = initDB();
-    $query;
-
-
-        date_default_timezone_set("PRC");
-        $starttime=date("Y-m-d");
-        $endtime=date("Y-m-d",(time()+3600*24));
-
-        $query = "SELECT mealorders.id as mealorder_id, user_id, order_time,mealorders.description as mealorder_description,mealorders.promotion as mealorder_promotion,mealorders.isActive as mealorder_isActive,mealorderitems.id as mealorderitem_id,menuitem_id,mealorderitems.price as mealorderitem_price,amount,menu_name,name,user.id,username,uid FROM mealorders, mealorderitems,menuitems, restaurants,user where mealorderitems.mealorder_id=mealorders.id and mealorderitems.menuitem_id=menuitems.id and menuitems.restaurant_id=restaurants.id and user_id=user.id order by order_time desc;";
-        //echo $query;
-        $result = mysql_query($query);
-    // or die ("Query Failed ".mysql_error());
-    $res_array;
-    for ($count=0; $row = mysql_fetch_assoc($result); $count++) {
-     $res_array[$count] = $row;
-    }
-    closeDB($connection);
-    return $res_array;
-}
-
-function deleteMealOrder($id) {
+function deleteOrder($oid) {
     $connection = initDB();
     $query;
 
-    if(isset($id)) {
-        $query = "delete from  mealorders where id=".$id.";";
+    if(isset($oid)) {
+        $query = "delete from  `order` where oid=".$oid.";";
     }
     else {
-        echo "The id is empty!";
+        echo "The oid is empty!";
         return false;
     }
 
-    //echo $query;
-    $result = mysql_query($query);
-    // or die ("Query Failed ".mysql_error());
-    $query2 = "delete from  mealorderitems where mealorder_id=".$id.";";
-
-    $result2 = mysql_query($query2);
-
+    $result = mysql_query($query) or die ("Query Failed ".mysql_error());
+    
     if ($result==false) {
-        echo "delete mealorder wrong!";
+        echo "delete order wrong!";
         return false;
-    }else if ($result2==false){
-        echo "delete mealorderitem wrong!";
-        return false;
-    }else {
+    }
+	else {
         return true;
     }
 }
 
-function toggleMealOrder($id) {
+function confirmOrder($oid,$uid) {
     $connection = initDB();
     $query;
-
-    if(isset($id)) {
-        $query = "SELECT id, isActive from mealorders where id=".$id.";";
+	
+	date_default_timezone_set("PRC");
+	$bid = getBid($uid);	
+	
+    if(isset($oid)) {
+        $query = "UPDATE `order` SET bid = ".$bid.", time = '".date("Y-m-d H:i:s")."', status = 'confirmed' where oid=".$oid.";";
     }
-
-    $result = mysql_query($query);
-    $arr =  mysql_fetch_assoc($result);
-    $isActive = $arr['isActive'];
-    $isNewActive;
-
-    if ($isActive=='N' ) {
-        $isNewActive='Y';
-    }else if($isActive=='Y') {
-            $isNewActive= 'N';
-        }else {
-            $isNewActive= 'N';
-        }
-
-    if (isset($isNewActive)) {
-        $query2 = "update mealorders set isActive='".$isNewActive."' where id=".$id.";";
-        $result2 = mysql_query($query2);
-        if ($result2==true) {
-            closeDB($connection);
-            return true;
-        }else {
-            session_start();
-            $_SESSION['errorMessage']="Update isActive error.";
-            closeDB($connection);
-            return false;
-        }
-
-    }else {
-        session_start();
-        $_SESSION['errorMessage']="Meal order did not exist.";
-        closeDB($connection);
+    else {
+        echo "Nothing to confirm!";
         return false;
     }
+
+    $result = mysql_query($query) or die ("Query Failed ".mysql_error());
+    
+    if ($result==false) {
+        echo "Confirm order wrong!";
+        return false;
+    }
+	else {
+        return true;
+    }
+}
+
+function getBid($uid){	
+	$connection = initDB();
+    $query;
+	$query2;
+	
+	$query = "SELECT coordinate FROM user WHERE uid = '".$uid."';";
+    $result = mysql_query($query) or die ("Query Failed ".mysql_error());
+	$Arr = mysql_fetch_assoc($result);
+	$coordinate = $Arr['coordinate'];
+	
+	$query2 = "SELECT bid,coordinate FROM branch;";
+	$result2 = mysql_query($query2) or die ("Query Failed ".mysql_error());
+	$temp = 360;
+	$bid = 0;
+	while($row = mysql_fetch_array($result2)){
+		$branchCoordinate = $row['coordinate'];
+		if (pow($branchCoordinate - $coordinate,2) - pow($temp - $coordinate,2) < 0){
+			$temp = $branchCoordinate;
+			$bid = $row['bid'];
+		}
+	}
+	return $bid;
 }
 ?>

@@ -1,17 +1,15 @@
 <?php
-include ("../include/isadmin.php");
+include "include/isadmin.php";
+include("foodmanager.php");
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-        <title>商品信息</title>
-        <link href="../css/default.css" rel="stylesheet" type="text/css" />
+        <title>Menu Item Info.</title>
+        <link href="css/default.css" rel="stylesheet" type="text/css" />
     </head>
-    <?php
-            include("../foodmanager.php");
-    ?>
     
     <body>
         <div id="wrapper">
@@ -52,37 +50,39 @@ include ("../include/isadmin.php");
                                 	echo "<td>".$product->get_sort()."</td>";                            	
 									echo "<td>".$product->get_price()."</td>";
                                 	echo "<td>".$product->get_description()."</td>";
+									echo "<td><form  action='editProduct.php' method='post'><input type='hidden' name='pid' value='".$product->get_pid()."'/><input type='submit' value='Edit'/></form></td>";
                                 	echo "</tr>";
                             	}
                         	echo "</table>";
                         	}
 						?>
-                      	<form action="viewproductsController.php" method="post">
+                      	<form action="searchProduct.php" method="post">
                         	<select name="sort">
                             	<option>all</option>
                                 <option>pizza</option>
                                 <option>drink</option>
                                 <option>3</option>
                             </select>
-                            <input type='text' name='name'>&nbsp <input type='submit' value='search'>
-                    </form>
+                            <input type='text' name='name'>&nbsp <input type='submit' value='search'>&nbsp <input type="button" value="  Add   " onclick="javaScript:window.location.href='addProduct.php'">
+                        </form>
+                    
                     </div>
-                    <!-- end div#welcome -->			
+                    <!-- end div#welcome -->		
                     
                 </div>
                 <!-- end div#content -->
                 <div id="sidebar">
                     <!--ul-->
-                        <?php include '../include/usernav.php'; ?>
+                        <?php  include 'include/adminnav.php'; ?>
                         <!-- end navigation -->
-                            <?php include '../include/updates.php'; ?>
+                            <?php include 'include/updates.php'; ?>
                         <!-- end updates -->
                     <!--/ul-->
                 </div>
                 <!-- end div#sidebar -->
                 <div style="clear: both; height: 1px"></div>
             </div>
-                <?php include '../include/footer.php'; ?>
+                <?php include 'include/footer.php'; ?>
         </div>
         <!-- end div#wrapper -->
     </body>

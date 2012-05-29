@@ -1,8 +1,4 @@
 <?php
-/* 
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 include "../foodmanager.php";
 
 $productData = getproductInfo($_POST['pid']);
@@ -18,7 +14,7 @@ date_default_timezone_set("PRC");
 $order->set_time(date("Y-m-d H:i:s"));
 $order->set_pid($product->get_pid());
 $order->set_quantity($quantity);
-$order->set_price($product->get_price());
+$order->set_price($quantity * $product->get_price());
 $order->set_status("ordering");
 
 

@@ -1,5 +1,5 @@
 <?php
-include "../foodmanager.php";
+include "foodmanager.php";
 
 $name = $_POST['name'];
 $sort = $_POST['sort'];
@@ -18,5 +18,5 @@ if (count($productData) == 0)
 	session_start();
 	$_SESSION['productName'] = $name;
 	$_SESSION['sort'] = $sort;
-	Header("Location:order.php");
+	Header("Location:menuitemfunctionadministration.php");
 ?>

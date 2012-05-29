@@ -6,7 +6,7 @@ include ("../include/isadmin.php");
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-        <title>用户信息</title>
+        <title>User Info</title>
         <link href="../css/default.css" rel="stylesheet" type="text/css" />
     </head>
     <?php

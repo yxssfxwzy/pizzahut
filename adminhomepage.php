@@ -10,10 +10,8 @@
     </head>
     <?php
             include("foodmanager.php");
-            $id=0;
-            if(isset($_REQUEST["id"])){
-            $id = $_REQUEST["id"];
-        }
+            $uid=0;
+        
     ?>
 
     <body>
@@ -26,14 +24,15 @@
                         <!-- Fetch Rows -->
                         <table class="aatable">
                             <tr>
-                                <th>用户编号</th>
+                                <th>用户id</th>
                                 <th>用户名</th>
                                 <th>电话</th>
                                 <th>地址</th>
+                                <th>经纬度</th>
                                 <th>是否为管理员</th>                               
                             </tr>
                             <?php
-                            $userData = getUserInfo($id);
+                            $userData = getUserInfo($uid);
 
                             for($index=0;$index < count($userData);$index++){
                                 $user = $userData[$index];
@@ -42,6 +41,7 @@
                                 echo "<td>".$user->get_name()."</td>";
                                 echo "<td>".$user->get_tel()."</td>";
                                 echo "<td>".$user->get_address()."</td>";
+                                echo "<td>".$user->get_coordinate()."</td>";
                                 echo "<td>".$is=$user->get_isadmin()=='Y'?'是':'否'."</td>";
                                 echo "</tr>";
                             }
@@ -54,11 +54,7 @@
                 <!-- end div#content -->
                 <div id="sidebar">
                     <ul>
-                        <?php if ($_SESSION['isAdmin'] ){
-                                include 'include/adminnav.php';
-                                }else{
-                                  include 'include/usernav.php';
-                                } ?>
+                        <?php include 'include/adminnav.php'; ?>
                         <!-- end navigation -->
                             <?php include 'include/updates.php'; ?>
                         <!-- end updates -->

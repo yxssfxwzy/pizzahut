@@ -6,7 +6,7 @@ include "../include/islogin.php";
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-        <title>User Info.</title>
+        <title>Branch Info.</title>
         <link href="../css/default.css" rel="stylesheet" type="text/css" />
     </head>
     <?php
@@ -38,7 +38,6 @@ include "../include/islogin.php";
                                 echo "<td>".$branch->get_tel()."</td>";
                                        echo "<td>".$branch->get_address()."</td>";
                                 echo "<td>".$branch->get_coordinate()."</td>";
-                                echo "<td><form  action='orderMenuItem.php' method='post'><input type='hidden' name='branch_bid' value='".$branch->get_bid()."'/><input type='submit' value='Order'/></form></td>";
                                 echo "</tr>";
                             }
                             ?>
