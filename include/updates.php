@@ -1,4 +1,4 @@
-<!-- Updates and News Box for our site -->
+<!-- Updates and News Box for our site 
 <li id="news">
     <h2>News &amp; Updates</h2>
     <ul>
@@ -16,3 +16,4 @@
         </li>        
     </ul>
 </li>
+-->

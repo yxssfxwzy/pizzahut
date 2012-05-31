@@ -16,7 +16,7 @@
             <div id="page">
                 <div id="content">
                     <div id="welcome">
-                         <a href="userinfo.php"><?php echo $_SESSION['uid'];?>,</a>welcome to the online food system.
+                         <a href="../user/userinfo.php"><?php echo $_SESSION['uid'];?>,</a>welcome to the online food system.
                     
                     </div>
                     <!-- end div#welcome -->
