@@ -10,6 +10,7 @@ class Restaurant{
     private $description;
     private $address;
     private $telephone;
+   private $coordinate;
     private $isactive;
     public function get_id() {
         return $this->id;
@@ -50,6 +51,15 @@ class Restaurant{
     public function set_telephone($telephone) {
         $this->telephone = $telephone;
     }
+    
+   public function get_coordinate() {
+        return $this->coordinate;
+    }
+
+    public function set_coordinate($coordinate) {
+        $this->coordinate = $coordinate;
+    }
+    
 
     public function get_isactive() {
         return $this->isactive;

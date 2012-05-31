@@ -31,7 +31,7 @@ include "include/isadmin.php";
                                 <th>Name</th>
                                 <th>Telephone</th>
                                 <th>Address</th>
-                                <th>Description</th>
+                                <th>Coordinate</th>
                                 <th>Is Active</th>
                                 <th>Operation</th>
                             </tr>
@@ -45,7 +45,7 @@ include "include/isadmin.php";
                                 echo "<td>".$restaurant->get_name()."</td>";
                                 echo "<td>".$restaurant->get_telephone()."</td>";
                                 echo "<td>".$restaurant->get_address()."</td>";
-                                echo "<td>".$restaurant->get_description()."</td>";
+                                echo "<td>".$restaurant->get_coordinate()."</td>";
                                 echo "<td>".$restaurant->get_isactive()."</td>";
                                 echo "<td><form  action='deleteRestaurant.php' method='post'><input type='hidden' name='id' value='".$restaurant->get_id()."'/><input type='submit' value='delete'/></form>
                                             <form action='admineditrestaurant.php' method='post'><input type='hidden' name='id' value='".$restaurant->get_id()."'/><input type='submit' value='Edit' /></form>
@@ -59,7 +59,7 @@ include "include/isadmin.php";
                                     <td><input type="text" name="name" value="" /></td>
                                     <td><textarea name="telephone"></textarea></td>
                                     <td><textarea name="address"></textarea></td>
-                                    <td><textarea name="description"></textarea></td>
+                                    <td><textarea name="coordinate"></textarea></td>
                                     <td><input type="radio" name="isActive" value="Y" checked="true"/>Y<input type="radio" name="isActive" value="N"/>N</td>
                                     <td><input type="submit" value="add" /></td>
                                 </tr>

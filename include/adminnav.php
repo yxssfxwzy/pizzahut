@@ -11,7 +11,7 @@
         <li><a href="history.php">History</a></li>
         <li><a href="restaurantinfo.php">Order</a></li>
         <li><a href="viewMealOrder.php">View Order</a></li>
-        <li><a href="/../logout.php">Logout</a></li>
+        <li><a href="./logout.php">Logout</a></li>
         
     </ul>
 </li>
